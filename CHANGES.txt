@@ -1,3 +1,15 @@
+justbytes 0.16 (UNRELEASED)
+===========================
+Recommended development distro: Fedora 33
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/justbytes/pull/69
+  https://github.com/stratis-storage/justbytes/pull/68
+  https://github.com/stratis-storage/justbytes/pull/66
+  https://github.com/stratis-storage/justbytes/pull/65
+  https://github.com/stratis-storage/justbytes/pull/64
+
+
 justbytes 0.15
 ==============
 
@@ -11,5 +23,6 @@ YAML linter: yamllint (1.25.0)
   https://github.com/stratis-storage/justbytes/pull/61
 
 - Tidies and Maintenance:
+  https://github.com/stratis-storage/justbytes/pull/63
   https://github.com/stratis-storage/justbytes/pull/62
   https://github.com/stratis-storage/justbytes/pull/60
