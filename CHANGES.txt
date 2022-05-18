@@ -1,8 +1,17 @@
 justbytes 0.16 (UNRELEASED)
 ===========================
-Recommended development distro: Fedora 33
+Recommended development distro: Fedora 35
 
 - Tidies and Maintenance:
+  https://github.com/stratis-storage/justbytes/pull/79
+  https://github.com/stratis-storage/justbytes/pull/77
+  https://github.com/stratis-storage/justbytes/pull/76
+  https://github.com/stratis-storage/justbytes/pull/75
+  https://github.com/stratis-storage/justbytes/pull/74
+  https://github.com/stratis-storage/justbytes/pull/73
+  https://github.com/stratis-storage/justbytes/pull/72
+  https://github.com/stratis-storage/justbytes/pull/71
+  https://github.com/stratis-storage/justbytes/pull/70
   https://github.com/stratis-storage/justbytes/pull/69
   https://github.com/stratis-storage/justbytes/pull/68
   https://github.com/stratis-storage/justbytes/pull/66
