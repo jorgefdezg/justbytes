@@ -24,36 +24,23 @@ from pypbt import domains
 from pypbt.quantifiers import forall,exists
 # isort: LOCAL
 from justbytes._util.generators import next_or_last, takeuntil
-"""
-Test next_or_last.
-"""
 
-# @given(strategies.lists(strategies.integers()), strategies.integers())
-# @settings(max_examples=10)
+
 @forall(value = domains.List(domains.Int()),n_samples = 3)
 @forall(default = domains.Int(),n_samples = 3)
 def test_results_true(value, default):
     """
     Test results when the predicate is always True.
     """
-    # self.assertEqual(
-    #     next_or_last(lambda x: True, value, default),
-    #     value[0] if value != [] else default,
-    # )
     return next_or_last(lambda x: True, value, default) == (value[0] if value != [] else default)
 
-# @given(strategies.lists(strategies.integers()), strategies.integers())
-# @settings(max_examples=10)
+
 @forall(value = domains.List(domains.Int()),n_samples = 3)
 @forall(default = domains.Int(),n_samples = 3)
 def test_results_false(value, default):
     """
     Test results when the predicate is always False.
     """
-    # self.assertEqual(
-    #     next_or_last(lambda x: False, value, default),
-    #     value[-1] if value != [] else default,
-    # )
     return next_or_last(lambda x: False, value, default) == (value[-1] if value != [] else default)
 
 """

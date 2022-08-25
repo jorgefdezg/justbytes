@@ -21,27 +21,22 @@
 import unittest
 
 # isort: THIRDPARTY
-from hypothesis import given, settings, strategies
-
+from pypbt import domains
+from pypbt.quantifiers import forall,exists
 # isort: LOCAL
 from justbytes import UNITS, Range
 
 
-class ConversionTestCase(unittest.TestCase):
-    """Test conversions."""
+"""Test conversions."""
+@forall(size = domains.Int(),n_samples = 5)
+@exists(unit = domains.DomainFromIterable(UNITS(),True))
+def test_int(size, unit):
+    """Test integer conversions."""
+    return int(Range(size, unit)) == (size * int(unit))
 
-    @given(strategies.integers(), strategies.sampled_from(UNITS()))
-    @settings(max_examples=5)
-    def test_int(self, size, unit):
-        """Test integer conversions."""
-        self.assertEqual(int(Range(size, unit)), size * int(unit))
 
-    @given(
-        strategies.builds(
-            Range, strategies.integers(), strategies.sampled_from(UNITS())
-        )
-    )
-    @settings(max_examples=50)
-    def test_repr(self, value):
-        """Test that repr looks right."""
-        self.assertEqual(f"{value !r}", f"Range({value.magnitude !r})")
+@forall(unit = domains.DomainFromIterable(UNITS(),True),n_samples=10)
+@forall(value = lambda unit: domains.DomainPyObject(Range,domains.Int(),unit),n_samples = 5)
+def test_repr(unit,value):
+    """Test that repr looks right."""
+    return (f"{value !r}") == (f"Range({value.magnitude !r})")

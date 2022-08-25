@@ -24,231 +24,222 @@ from decimal import Decimal
 from fractions import Fraction
 
 # isort: THIRDPARTY
-from hypothesis import given, settings
+from pypbt import domains
+from pypbt.quantifiers import forall,exists
 
 # isort: LOCAL
-from justbytes import Range
+from justbytes import Range,UNITS
 
-from tests.test_hypothesis.test_size.utils import NUMBERS_STRATEGY  # isort:skip
-from tests.test_hypothesis.test_size.utils import SIZE_STRATEGY  # isort:skip
-
-
-class AdditionTestCase(unittest.TestCase):
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 2)
+def test_addition(units,size_1,size_2):
     """Test addition."""
-
-    @given(SIZE_STRATEGY, SIZE_STRATEGY)
-    @settings(max_examples=10)
-    def test_addition(self, size_1, size_2):
-        """Test addition."""
-        self.assertEqual(size_1 + size_2, Range(size_1.magnitude + size_2.magnitude))
+    return (size_1 + size_2) == Range(size_1.magnitude + size_2.magnitude)
 
 
-class DivmodTestCase(unittest.TestCase):
-    """Test divmod."""
-
-    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Range(0)))
-    @settings(max_examples=10)
-    def test_divmod_with_range(self, size_1, size_2):
-        """Test divmod with a size."""
-        (div, rem) = divmod(size_1.magnitude, size_2.magnitude)
-        self.assertEqual(divmod(size_1, size_2), (div, Range(rem)))
-
-    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
-    @settings(max_examples=10)
-    def test_divmod_with_number(self, size_1, size_2):
-        """Test divmod with a number."""
-        (div, rem) = divmod(size_1.magnitude, Fraction(size_2))
-        self.assertEqual(divmod(size_1, size_2), (Range(div), Range(rem)))
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.Int(min_value=1),units),n_samples = 2)
+def test_divmod_with_range(units,size_1,size_2):
+    """Test divmod with a size."""
+    (div, rem) = divmod(size_1.magnitude, size_2.magnitude)
+    return divmod(size_1, size_2) == (div, Range(rem))
 
 
-class FloordivTestCase(unittest.TestCase):
-    """Test floordiv."""
-
-    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Range(0)))
-    @settings(max_examples=10)
-    def test_floordiv_with_range(self, size_1, size_2):
-        """Test floordiv with a size."""
-        self.assertEqual(size_1 // size_2, size_1.magnitude // size_2.magnitude)
-
-    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
-    @settings(max_examples=10)
-    def test_floordiv_with_number(self, size_1, size_2):
-        """Test floordiv with a number."""
-        self.assertEqual(size_1 // size_2, Range(size_1.magnitude // Fraction(size_2)))
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(size_2 = domains.DomainPyObject(Fraction,domains.Int(min_value=1),domains.Int(min_value=1,max_value=100)),n_samples = 2)
+def test_divmod_with_number(units,size_1, size_2):
+    """Test divmod with a number."""
+    (div, rem) = divmod(size_1.magnitude, Fraction(size_2))
+    return divmod(size_1, size_2) == (Range(div), Range(rem))
 
 
-class ModTestCase(unittest.TestCase):
-    """Test mod."""
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.Int(min_value=1),units),n_samples = 2)
+def test_floordiv_with_range(units,size_1, size_2):
+    """Test floordiv with a size."""
+    return (size_1 // size_2) == (size_1.magnitude // size_2.magnitude)
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Range(0)))
-    @settings(max_examples=10)
-    def test_mod_with_range(self, size_1, size_2):
-        """Test mod with a size."""
-        self.assertEqual(size_1 % size_2, Range(size_1.magnitude % size_2.magnitude))
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(size_2 = domains.DomainPyObject(Fraction,domains.Int(min_value=1),domains.Int(min_value=1,max_value=100)),n_samples = 2)
+def test_floordiv_with_number(units, size_1, size_2):
+    """Test floordiv with a number."""
+    return size_1 // size_2 == Range(size_1.magnitude // Fraction(size_2))
 
-    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
-    @settings(max_examples=10)
-    def test_mod_with_number(self, size_1, size_2):
-        """Test mod with a number."""
-        self.assertEqual(size_1 % size_2, Range(size_1.magnitude % Fraction(size_2)))
+"""Test mod."""
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.Int(min_value=1),units),n_samples = 2)
+def test_mod_with_range(units, size_1, size_2):
+    """Test mod with a size."""
+    return size_1 % size_2 == Range(size_1.magnitude % size_2.magnitude)
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(size_2 = domains.DomainPyObject(Fraction,domains.Int(min_value=1),domains.Int(min_value=1,max_value=100)),n_samples = 2)
+def test_mod_with_number(units, size_1, size_2):
+    """Test mod with a number."""
+    return size_1 % size_2 == Range(size_1.magnitude % Fraction(size_2))
 
 
-class MultiplicationTestCase(unittest.TestCase):
+"""Test multiplication."""
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(num = domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value=1,max_value=100)),n_samples = 2)
+def test_multiplication(units, size, num):
     """Test multiplication."""
-
-    @given(SIZE_STRATEGY, NUMBERS_STRATEGY)
-    @settings(max_examples=10)
-    def test_multiplication(self, size, num):
-        """Test multiplication."""
-        self.assertEqual(size * num, Range(Fraction(num) * size.magnitude))
+    return size * num == Range(Fraction(num) * size.magnitude)
 
 
-class RdivmodTestCase(unittest.TestCase):
-    """Test rdivmod."""
+"""Test rdivmod."""
 
-    @given(SIZE_STRATEGY.filter(lambda x: x != Range(0)), SIZE_STRATEGY)
-    @settings(max_examples=10)
-    def test_rdivmod_with_range(self, size_1, size_2):
-        """Test divmod with a size."""
-        (div, rem) = divmod(size_2.magnitude, size_1.magnitude)
-        self.assertEqual(size_1.__rdivmod__(size_2), (div, Range(rem)))
-
-
-class RfloordivTestCase(unittest.TestCase):
-    """Test rfloordiv."""
-
-    @given(SIZE_STRATEGY.filter(lambda x: x != Range(0)), SIZE_STRATEGY)
-    @settings(max_examples=10)
-    def test_ffloordiv_with_range(self, size_1, size_2):
-        """Test floordiv with a size."""
-        self.assertEqual(
-            size_1.__rfloordiv__(size_2), size_2.magnitude // size_1.magnitude
-        )
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.Int(min_value=1),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+def test_rdivmod_with_range(units, size_1, size_2):
+    """Test divmod with a size."""
+    (div, rem) = divmod(size_2.magnitude, size_1.magnitude)
+    return size_1.__rdivmod__(size_2) == (div, Range(rem))
 
 
-class RmodTestCase(unittest.TestCase):
-    """Test rmod."""
+"""Test rfloordiv."""
 
-    @given(SIZE_STRATEGY.filter(lambda x: x != Range(0)), SIZE_STRATEGY)
-    @settings(max_examples=10)
-    def test_rmod_with_range(self, size_1, size_2):
-        """Test rmod with a size."""
-        self.assertEqual(
-            size_1.__rmod__(size_2), Range(size_2.magnitude % size_1.magnitude)
-        )
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.Int(min_value=1),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+def test_ffloordiv_with_range(units, size_1, size_2):
+    """Test floordiv with a size."""
+    return size_1.__rfloordiv__(size_2) == size_2.magnitude // size_1.magnitude
 
 
-class RsubTestCase(unittest.TestCase):
-    """Test rsub."""
+"""Test rmod."""
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY)
-    @settings(max_examples=10)
-    def test_rsub(self, size_1, size_2):
-        """Test __rsub__."""
-        self.assertEqual(
-            size_1.__rsub__(size_2), Range(size_2.magnitude - size_1.magnitude)
-        )
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.Int(min_value=1),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+def test_rmod_with_range(units, size_1, size_2):
+    """Test rmod with a size."""
+    return size_1.__rmod__(size_2) == Range(size_2.magnitude % size_1.magnitude)
 
 
-class RtruedivTestCase(unittest.TestCase):
-    """Test rtruediv."""
+"""Test rsub."""
 
-    @given(SIZE_STRATEGY.filter(lambda x: x != Range(0)), SIZE_STRATEGY)
-    @settings(max_examples=10)
-    def test_truediv_with_range(self, size_1, size_2):
-        """Test truediv with a size."""
-        self.assertEqual(
-            size_1.__rtruediv__(size_2), size_2.magnitude / size_1.magnitude
-        )
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+def test_rsub(units, size_1, size_2):
+    """Test __rsub__."""
+    return size_1.__rsub__(size_2) == Range(size_2.magnitude - size_1.magnitude)
 
 
-class SubtractionTestCase(unittest.TestCase):
+"""Test rtruediv."""
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.Int(min_value=1),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+def test_truediv_with_range(units, size_1, size_2):
+    """Test truediv with a size."""
+    return size_1.__rtruediv__(size_2) == size_2.magnitude / size_1.magnitude
+
+
+"""Test subtraction."""
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+def test_subtraction(units, size_1, size_2):
     """Test subtraction."""
-
-    @given(SIZE_STRATEGY, SIZE_STRATEGY)
-    @settings(max_examples=10)
-    def test_subtraction(self, size_1, size_2):
-        """Test subtraction."""
-        self.assertEqual(size_1 - size_2, Range(size_1.magnitude - size_2.magnitude))
+    return size_1 - size_2 == Range(size_1.magnitude - size_2.magnitude)
 
 
-class TruedivTestCase(unittest.TestCase):
-    """Test truediv."""
+"""Test truediv."""
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Range(0)))
-    @settings(max_examples=10)
-    def test_truediv_with_range(self, size_1, size_2):
-        """Test truediv with a size."""
-        self.assertEqual(size_1 / size_2, size_1.magnitude / size_2.magnitude)
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.Int(min_value=1),units),n_samples = 2)
+def test_truediv_with_range(units, size_1, size_2):
+    """Test truediv with a size."""
+    return size_1 / size_2 == size_1.magnitude / size_2.magnitude
 
-    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
-    def test_truediv_with_number(self, size_1, size_2):
-        """Test truediv with a number."""
-        self.assertEqual(size_1 / size_2, Range(size_1.magnitude / Fraction(size_2)))
-
-
-class UnaryOperatorsTestCase(unittest.TestCase):
-    """Test unary operators."""
-
-    @given(SIZE_STRATEGY, SIZE_STRATEGY)
-    @settings(max_examples=5)
-    def test_hash(self, size_1, size_2):
-        """Test that hash has the necessary property for hash table lookup."""
-        size_3 = copy.deepcopy(size_1)
-        self.assertTrue(hash(size_1) == hash(size_3))
-        self.assertTrue(size_1 != size_2 or hash(size_1) == hash(size_2))
-
-    @given(SIZE_STRATEGY)
-    @settings(max_examples=5)
-    def test_abs(self, size):
-        """Test absolute value."""
-        self.assertEqual(abs(size), Range(abs(size.magnitude)))
-
-    @given(SIZE_STRATEGY)
-    @settings(max_examples=5)
-    def test_neg(self, size):
-        """Test negation."""
-        self.assertEqual(-size, Range(-size.magnitude))
-
-    @given(SIZE_STRATEGY)
-    @settings(max_examples=5)
-    def test_pos(self, size):
-        """Test positive."""
-        self.assertEqual(+size, size)
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(size_2 = domains.DomainPyObject(Fraction,domains.Int(min_value=1),domains.Int(min_value=1,max_value=100)),n_samples = 2)
+def test_truediv_with_number(units, size_1, size_2):
+    """Test truediv with a number."""
+    return size_1 / size_2, Range(size_1.magnitude / Fraction(size_2))
 
 
-class ArithmeticPropertiesTestCase(unittest.TestCase):
+"""Test unary operators."""
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size_1 = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 2)
+@forall(size_2 = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+def test_hash(units, size_1, size_2):
+    """Test that hash has the necessary property for hash table lookup."""
+    size_3 = copy.deepcopy(size_1)
+    if not hash(size_1) == hash(size_3):
+        return False
+    return size_1 != size_2 or hash(size_1) == hash(size_2)
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 3)
+def test_abs(units, size):
+    """Test absolute value."""
+    return abs(size) == Range(abs(size.magnitude))
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 3)
+def test_neg(units, size):
+    """Test negation."""
+    return -size == Range(-size.magnitude)
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(size = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 3)
+def test_pos(units, size):
+    """Test positive."""
+    return +size == size
+
+
+# """
+# Verify that distributive property holds.
+# """
+
+
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(s = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 2)
+@forall(n = domains.Int(),n_samples = 2)
+@forall(m = domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value=1,max_value=100)),n_samples = 2)
+# pylint: disable=invalid-name
+def test_distributivity1(units, s, n, m):
     """
-    Verify that distributive property holds.
+    Assert distributivity across numbers.
     """
+    return (n + m) * s == n * s + m * s
 
-    @given(
-        SIZE_STRATEGY,
-        NUMBERS_STRATEGY.filter(lambda n: not isinstance(n, Decimal)),
-        NUMBERS_STRATEGY.filter(lambda n: not isinstance(n, Decimal)),
-    )
-    @settings(max_examples=10)
-    # pylint: disable=invalid-name
-    def test_distributivity1(self, s, n, m):
-        """
-        Assert distributivity across numbers.
-        """
-        self.assertEqual((n + m) * s, n * s + m * s)
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(p = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 2)
+@forall(q = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+@forall(n = domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value=1,max_value=100)),n_samples = 2)
+# pylint: disable=invalid-name
+def test_distributivity2(units, p, q, n):
+    """
+    Assert distributivity across sizes.
+    """
+    return (p + q) * n == p * n + q * n
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY, NUMBERS_STRATEGY)
-    @settings(max_examples=10)
-    # pylint: disable=invalid-name
-    def test_distributivity2(self, p, q, n):
-        """
-        Assert distributivity across sizes.
-        """
-        self.assertEqual((p + q) * n, p * n + q * n)
-
-    @given(SIZE_STRATEGY, SIZE_STRATEGY, SIZE_STRATEGY)
-    @settings(max_examples=10)
-    # pylint: disable=invalid-name
-    def test_associativity(self, p, q, r):
-        """
-        Assert associativity across sizes.
-        """
-        self.assertEqual((p + q) + r, p + (r + q))
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+@forall(p = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 2)
+@forall(q = lambda units: domains.DomainPyObject(Range,domains.Int(),units),n_samples = 2)
+@forall(r = lambda units: domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),units),n_samples = 2)
+# pylint: disable=invalid-name
+def test_associativity(units, p, q, r):
+    """
+    Assert associativity across sizes.
+    """
+    return (p + q) + r == p + (r + q)

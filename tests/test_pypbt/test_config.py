@@ -32,22 +32,13 @@ from justbytes._constants import UNITS
 """Test Range configuration."""
 
 
-# @forall(config = domains.DomainPyObject(DisplayConfig,show_approx_str=domains.Boolean()))
-# def test_setting_display_config(config):
-#     """Test that new str config is the correct one."""
-#     Config.set_display_config(config)
-#     return str(config) == str(Config.STRING_CONFIG.DISPLAY_CONFIG)
+@forall(config = domains.DomainPyObject(DisplayConfig,show_approx_str=domains.Boolean()))
+def test_setting_display_config(config):
+    """Test that new str config is the correct one."""
+    Config.set_display_config(config)
+    return str(config) == str(Config.STRING_CONFIG.DISPLAY_CONFIG)
 
-# @given(
-#     strategies.builds(
-#         ValueConfig,
-#         binary_units=strategies.booleans(),
-#         max_places=strategies.integers().filter(lambda x: x >= 0),
-#         min_value=strategies.fractions().filter(lambda x: x >= 0),
-#         exact_value=strategies.booleans(),
-#         unit=strategies.sampled_from(UNITS()),
-#     )
-# )
+
 @forall(units = domains.DomainFromIterable(UNITS(),True))
 @forall(config = lambda units: domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
     max_places=domains.Int(),

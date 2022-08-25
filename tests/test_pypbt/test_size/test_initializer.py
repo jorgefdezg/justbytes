@@ -22,33 +22,26 @@ import unittest
 from fractions import Fraction
 
 # isort: THIRDPARTY
-from hypothesis import given, settings, strategies
-
+from pypbt import domains
+from pypbt.quantifiers import forall,exists
+import random
+import decimal
 # isort: LOCAL
 from justbytes import UNITS, Range
 
-
-class InitializerTestCase(unittest.TestCase):
-    """Test conversions."""
-
-    @given(
-        strategies.one_of(
-            strategies.integers(),
-            strategies.fractions(),
-            strategies.builds(
-                str, strategies.decimals().filter(lambda x: x.is_finite())
-            ),
-        ),
-        strategies.one_of(
-            strategies.sampled_from(UNITS()),
-            strategies.builds(Range, strategies.fractions()),
-            strategies.fractions(),
-        ),
-    )
-    @settings(max_examples=50)
-    def test_initialization(self, size, unit):
-        """Test the initializer."""
-        factor = getattr(unit, "factor", getattr(unit, "magnitude", None))
-        if factor is None:
-            factor = Fraction(unit)
-        self.assertEqual(Range(size, unit).magnitude, Fraction(size) * factor)
+"""Test conversions."""
+@forall(integers = domains.Int(),n_samples = 3)
+@forall(fractions1 = domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),n_samples = 3)
+@forall(fractions2 = domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),n_samples = 3)
+@forall(range = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1))),n_samples = 3)
+@exists(method= domains.DomainFromIterable(UNITS(),True))
+def test_initialization(integers,fractions1,fractions2,range,method):
+    """Test the initializer."""
+    list_choices1 = [integers,fractions1]
+    list_choices2 = [range,fractions2,method]
+    choice1 = random.choice(list_choices1)
+    choice2 = random.choice(list_choices2)
+    factor = getattr(choice2, "factor", getattr(choice2, "magnitude", None))
+    if factor is None:
+        factor = Fraction(choice2)
+    return Range(choice1, choice2).magnitude == Fraction(choice1) * factor
