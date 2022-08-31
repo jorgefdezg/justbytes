@@ -30,10 +30,10 @@ import decimal
 from justbytes import UNITS, Range
 
 """Test conversions."""
-@forall(integers = domains.Int(),n_samples = 3)
-@forall(fractions1 = domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),n_samples = 3)
-@forall(fractions2 = domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),n_samples = 3)
-@forall(range = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1))),n_samples = 3)
+@forall(integers = domains.Int(),n_samples = 5)
+@forall(fractions1 = domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),n_samples = 4)
+@forall(fractions2 = domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),n_samples = 5)
+@forall(range = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1))),n_samples = 5)
 @exists(method= domains.DomainFromIterable(UNITS(),True))
 def test_initialization(integers,fractions1,fractions2,range,method):
     """Test the initializer."""

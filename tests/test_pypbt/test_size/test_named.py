@@ -50,38 +50,26 @@ from justbytes._constants import UNITS, BinaryUnits, DecimalUnits
 
 """Test conversion methods."""
 
-# @forall(units = domains.DomainFromIterable(UNITS(),True))
-# @forall(size = lambda units: domains.DomainPyObject(Range,domains.Int(min_value = 1),UNITS()),n_samples = 2)
-# @forall(ranges = lambda units: domains.DomainPyObject(Range,domains.Int(min_value=1),UNITS()),n_samples = 2)
-# def test_precision(units, size, ranges):
-#     list_choice= [ranges,units,None]
-#     choice = random.choice(list_choice)
-#     """Test precision of conversion."""
-#     factor = int(choice) if choice else int(B)
-#     return (size.convertTo(choice) * factor) == int(size)
+@forall(size = domains.DomainPyObject(Range,domains.Int(),UNITS()),n_samples = 5)
+@forall(ranges = domains.DomainPyObject(Range,domains.Int(min_value=1),UNITS()),n_samples = 5)
+@forall(units = domains.DomainFromIterable(UNITS(),True))
+def test_precision(size, ranges, units):
+    list_choice= [ranges,units,None]
+    choice = random.choice(list_choice)
+    """Test precision of conversion."""
+    factor = int(choice) if choice else int(B)
+    return (size.convertTo(choice) * factor) == int(size)
 
 
-# @given(
-#     SIZE_STRATEGY,
-#     strategies.builds(
-#         ValueConfig,
-#         min_value=strategies.fractions().filter(lambda x: x >= 0),
-#         binary_units=strategies.booleans(),
-#         exact_value=strategies.booleans(),
-#         max_places=strategies.integers(min_value=0, max_value=5),
-#         unit=strategies.sampled_from(UNITS() + [None]),
-#     ),
-# )
-@forall(size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 10)
+
+@forall(size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 15)
 @forall(config = domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
     max_places=domains.Int(),
     min_value=domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),
     exact_value=domains.Boolean(),
-    unit= (UNITS()+[None])),n_samples = 10)
+    unit= (UNITS()+[None])),n_samples = 15)
 def test_results(size, config):
     """Test component results."""
-    print("size = ", size)
-    print("config = ", config.unit)
     (magnitude, unit) = size.components(config)
     if magnitude * int(unit) != size.magnitude:
         return False
@@ -100,146 +88,132 @@ def test_results(size, config):
 # Test some aspects of the getString() method.
 # """
 
-# @given(
-#     SIZE_STRATEGY,
-#     strategies.builds(
-#         DisplayConfig,
-#         show_approx_str=strategies.booleans(),
-#         base_config=strategies.just(BaseConfig()),
-#         digits_config=strategies.just(DigitsConfig(use_letters=False)),
-#         strip_config=strategies.just(StripConfig()),
-#     ),
-#     strategies.integers(min_value=2, max_value=16),
-# )
-# @settings(max_examples=100)
-# def test_config(self, a_size, config, base):
-#     """
-#     Test properties of configuration.
-#     """
-#     result = a_size.getString(
-#         StringConfig(
-#             ValueConfig(base=base), config, Config.STRING_CONFIG.DISPLAY_IMPL_CLASS
-#         )
-#     )
+@forall(a_size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 10)
+@forall(config = domains.DomainPyObject(
+        DisplayConfig,
+        show_approx_str=domains.Boolean(),
+        base_config= BaseConfig(use_prefix= domains.Boolean(),use_subscript= domains.Boolean()),
+        digits_config=DigitsConfig(use_letters=False),
+        strip_config=StripConfig(strip_exact=domains.Boolean(), strip_whole=domains.Boolean())
+    ),n_samples = 5)
+@forall(base = domains.Int(min_value = 16, max_value =16),n_samples = 10)
+def test_config(a_size, config, base):
+    """
+    Test properties of configuration.
+    """
+    result = a_size.getString(
+        StringConfig(
+            ValueConfig(base=base), config, Config.STRING_CONFIG.DISPLAY_IMPL_CLASS
+        )
+    )
 
-#     if config.base_config.use_prefix and base == 16:
-#         self.assertNotEqual(result.find("0x"), -1)
+    if config.base_config.use_prefix and base == 16:
+        return result.find("0x") != -1
 
 # """
 # Test digits config.
 # """
-
-# @given(
-#     SIZE_STRATEGY,
-#     strategies.builds(
-#         DigitsConfig,
-#         separator=strategies.text(alphabet="-/*j:", max_size=1),
-#         use_caps=strategies.booleans(),
-#         use_letters=strategies.booleans(),
-#     ),
-# )
-# @settings(max_examples=50)
-# def test_config(self, a_size, config):
-#     """
-#     Test some basic configurations.
-#     """
-#     result = a_size.getString(
-#         StringConfig(
-#             Config.STRING_CONFIG.VALUE_CONFIG,
-#             DisplayConfig(digits_config=config),
-#             Config.STRING_CONFIG.DISPLAY_IMPL_CLASS,
-#         )
-#     )
-#     if config.use_letters:
-#         (number, _, _) = result.partition(" ")
-#         letters = [r for r in number if r in string.ascii_letters]
-#         if config.use_caps:
-#             self.assertTrue(all(r in string.ascii_uppercase for r in letters))
-#         else:
-#             self.assertTrue(all(r in string.ascii_lowercase for r in letters))
+@forall(a_size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 5)
+@forall(config = domains.DomainPyObject(DigitsConfig,
+        separator=domains.String(coding = "ascii",max_len = 1),
+        use_caps=domains.Boolean(),
+        use_letters=domains.Boolean()))
+def test_digits_config(a_size, config):
+    """
+    Test some basic configurations.
+    """
+    text = "-/*j:"
+    if config.separator in text:
+        result = a_size.getString(
+            StringConfig(
+                Config.STRING_CONFIG.VALUE_CONFIG,
+                DisplayConfig(digits_config=config),
+                Config.STRING_CONFIG.DISPLAY_IMPL_CLASS,
+            )
+        )
+        if config.use_letters:
+            (number, _, _) = result.partition(" ")
+            letters = [r for r in number if r in string.ascii_letters]
+            if config.use_caps:
+                return all(r in string.ascii_uppercase for r in letters)
+            else:
+                return all(r in string.ascii_lowercase for r in letters)
+        else : return True
+    else: return True
 
 # """Test rounding methods."""
 
-# @given(
-#     SIZE_STRATEGY,
-#     strategies.one_of(
-#         SIZE_STRATEGY.filter(lambda x: x.magnitude >= 0),
-#         strategies.sampled_from(UNITS()),
-#     ),
-#     strategies.sampled_from(ROUNDING_METHODS()),
-#     strategies.tuples(
-#         strategies.one_of(strategies.none(), SIZE_STRATEGY),
-#         strategies.one_of(strategies.none(), SIZE_STRATEGY),
-#     ),
-# )
-# def test_bounds(self, size, unit, rounding, bounds):
-#     """
-#     Test that result is between the specified bounds,
-#     assuming that the bounds are legal.
-#     """
-#     (lower, upper) = bounds
-#     assume(lower is None or upper is None or lower <= upper)
-#     rounded = size.roundTo(unit, rounding, bounds)
-#     self.assertTrue(lower is None or lower <= rounded)
-#     self.assertTrue(upper is None or upper >= rounded)
+@forall(size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 6)
+@forall(bounds = domains.Tuple(domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS())),n_samples=5)
+@forall(unit = domains.DomainFromIterable(UNITS(),True))
+@exists(rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True))
+def test_bounds(size, unit, rounding, bounds):
+    """
+    Test that result is between the specified bounds,
+    assuming that the bounds are legal.
+    """
+    (lower, upper) = bounds
+    if lower > upper:
+        return True
+    rounded = size.roundTo(unit, rounding, bounds)
+    if lower is not None and lower > rounded:
+        return False
+    if upper is not None and upper < rounded:
+        return False
+    return True
 
-# @given(
-#     SIZE_STRATEGY,
-#     strategies.one_of(
-#         SIZE_STRATEGY.filter(lambda x: x.magnitude >= 0),
-#         strategies.sampled_from(UNITS()),
-#     ),
-#     strategies.sampled_from(ROUNDING_METHODS()),
-# )
-# @example(Range(32), Range(0), ROUND_DOWN)
-# def test_results(self, size, unit, rounding):
-#     """Test roundTo results."""
-#     # pylint: disable=too-many-branches
-#     rounded = size.roundTo(unit, rounding)
 
-#     if (isinstance(unit, Range) and unit.magnitude == 0) or (
-#         not isinstance(unit, Range) and int(unit) == 0
-#     ):
-#         self.assertEqual(rounded, Range(0))
-#         return
+@forall(size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 15)
+@forall(unit = domains.DomainFromIterable(UNITS(),True))
+@exists(rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True))
+def test_roundTo_results(size, unit, rounding):
+    """Test roundTo results."""
+    # pylint: disable=too-many-branches
+    rounded = size.roundTo(unit, rounding)
 
-#     converted = size.convertTo(unit)
-#     if converted.denominator == 1:
-#         self.assertEqual(rounded, size)
-#         return
+    if (isinstance(unit, Range) and unit.magnitude == 0) or (
+        not isinstance(unit, Range) and int(unit) == 0):
+        if rounded != Range(0):
+            return False
 
-#     factor = getattr(unit, "magnitude", None) or int(unit)
-#     (quotient, remainder) = divmod(converted.numerator, converted.denominator)
-#     ceiling = Range((quotient + 1) * factor)
-#     floor = Range(quotient * factor)
-#     if rounding is ROUND_UP:
-#         self.assertEqual(rounded, ceiling)
-#         return
+    converted = size.convertTo(unit)
+    if converted.denominator == 1:
+        if rounded != size:
+            return False
 
-#     if rounding is ROUND_DOWN:
-#         self.assertEqual(rounded, floor)
-#         return
+    factor = getattr(unit, "magnitude", None) or int(unit)
+    (quotient, remainder) = divmod(converted.numerator, converted.denominator)
+    ceiling = Range((quotient + 1) * factor)
+    floor = Range(quotient * factor)
+    if rounding is ROUND_UP:
+        if rounded != ceiling:
+            return False
 
-#     if rounding is ROUND_TO_ZERO:
-#         if size > Range(0):
-#             self.assertEqual(rounded, floor)
-#         else:
-#             self.assertEqual(rounded, ceiling)
-#         return
+    if rounding is ROUND_DOWN:
+        if rounded != floor:
+            return False
 
-#     remainder = abs(Fraction(remainder, converted.denominator))
-#     half = Fraction(1, 2)
-#     if remainder > half:
-#         self.assertEqual(rounded, ceiling)
-#     elif remainder < half:
-#         self.assertEqual(rounded, floor)
-#     else:
-#         if rounding is ROUND_HALF_UP:
-#             self.assertEqual(rounded, ceiling)
-#         elif rounding is ROUND_HALF_DOWN:
-#             self.assertEqual(rounded, floor)
-#         else:
-#             if size > Range(0):
-#                 self.assertEqual(rounded, floor)
-#             else:
-#                 self.assertEqual(rounded, ceiling)
+    if rounding is ROUND_TO_ZERO:
+        if size > Range(0):
+            if rounded != floor:
+                return False
+        else:
+            if rounded != ceiling:
+                return False
+
+    remainder = abs(Fraction(remainder, converted.denominator))
+    half = Fraction(1, 2)
+    if remainder > half:
+        return rounded == ceiling
+    elif remainder < half:
+        return rounded == floor
+    else:
+        if rounding is ROUND_HALF_UP:
+            return rounded == ceiling
+        elif rounding is ROUND_HALF_DOWN:
+            return rounded == floor
+        else:
+            if size > Range(0):
+                return rounded == floor
+            else:
+                return rounded == ceiling

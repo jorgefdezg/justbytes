@@ -26,8 +26,8 @@ from pypbt.quantifiers import forall,exists
 from justbytes._util.generators import next_or_last, takeuntil
 
 
-@forall(value = domains.List(domains.Int()),n_samples = 3)
-@forall(default = domains.Int(),n_samples = 3)
+@forall(value = domains.List(domains.Int()),n_samples = 25)
+@forall(default = domains.Int(),n_samples = 20)
 def test_results_true(value, default):
     """
     Test results when the predicate is always True.
@@ -35,8 +35,8 @@ def test_results_true(value, default):
     return next_or_last(lambda x: True, value, default) == (value[0] if value != [] else default)
 
 
-@forall(value = domains.List(domains.Int()),n_samples = 3)
-@forall(default = domains.Int(),n_samples = 3)
+@forall(value = domains.List(domains.Int()),n_samples = 25)
+@forall(default = domains.Int(),n_samples = 20)
 def test_results_false(value, default):
     """
     Test results when the predicate is always False.
@@ -47,15 +47,15 @@ def test_results_false(value, default):
 Test takeuntil.
 """
 
-@forall(value = domains.List(domains.Int()),n_samples = 10)
-def test_results_false(value):
+@forall(value = domains.List(domains.Int()),n_samples = 500)
+def test_results_takeuntil_false(value):
     """
     Test results when none are sastifactory.
     """
     return list(takeuntil(lambda x: False, value)) == value
 
-@forall(value = domains.List(domains.Int()),n_samples = 10)
-def test_results_true(value):
+@forall(value = domains.List(domains.Int()),n_samples = 500)
+def test_results_takeuntil_true(value):
     """
     Test results when all are satisfactory.
     """

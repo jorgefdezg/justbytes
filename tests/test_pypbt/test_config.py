@@ -32,7 +32,7 @@ from justbytes._constants import UNITS
 """Test Range configuration."""
 
 
-@forall(config = domains.DomainPyObject(DisplayConfig,show_approx_str=domains.Boolean()))
+@forall(config = domains.DomainPyObject(DisplayConfig,show_approx_str=domains.Boolean()),n_samples=170)
 def test_setting_display_config(config):
     """Test that new str config is the correct one."""
     Config.set_display_config(config)
