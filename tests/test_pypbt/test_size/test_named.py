@@ -71,8 +71,6 @@ def test_precision(size, ranges, units):
 def test_results(size, config):
     """Test component results."""
     (magnitude, unit) = size.components(config)
-    if magnitude * int(unit) != size.magnitude:
-        return False
     if config.unit is None:
         if config.binary_units:
             if unit in BinaryUnits.UNITS():
@@ -84,6 +82,16 @@ def test_results(size, config):
     else:
         return unit == config.unit
 
+@forall(size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 15)
+@forall(config = domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
+    max_places=domains.Int(),
+    min_value=domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),
+    exact_value=domains.Boolean(),
+    unit= (UNITS()+[None])),n_samples = 15)
+def test_results_magnitude(size,config):
+    """Test magnitude results."""
+    (magnitude, unit) = size.components(config)
+    return magnitude * int(unit) == size.magnitude
 # """
 # Test some aspects of the getString() method.
 # """

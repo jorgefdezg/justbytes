@@ -20,7 +20,7 @@
 import unittest
 
 # isort: THIRDPARTY
-from hypothesis import given, strategies
+from hypothesis import given, strategies, settings
 
 # isort: LOCAL
 from justbytes._constants import BinaryUnits, DecimalUnits
@@ -33,6 +33,7 @@ class ConstantsTestCase(unittest.TestCase):
         strategies.integers(min_value=0, max_value=BinaryUnits.max_exponent()),
         strategies.integers(min_value=0, max_value=DecimalUnits.max_exponent()),
     )
+    @settings(max_examples=500)
     def test_exp_method(self, bexp, dexp):
         """Test extracting unit for a given exponent."""
         self.assertEqual(

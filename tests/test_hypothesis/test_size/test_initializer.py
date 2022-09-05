@@ -45,7 +45,7 @@ class InitializerTestCase(unittest.TestCase):
             strategies.fractions(),
         ),
     )
-    @settings(max_examples=50)
+    @settings(max_examples=500)
     def test_initialization(self, size, unit):
         """Test the initializer."""
         factor = getattr(unit, "factor", getattr(unit, "magnitude", None))

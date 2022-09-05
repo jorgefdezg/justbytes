@@ -41,7 +41,7 @@ class RangeTestCase(unittest.TestCase):
         Config.STRING_CONFIG.VALUE_CONFIG = self.str_config
 
     @given(strategies.builds(DisplayConfig, show_approx_str=strategies.booleans()))
-    @settings(max_examples=30)
+    @settings(max_examples=170)
     def test_setting_display_config(self, config):
         """Test that new str config is the correct one."""
         Config.set_display_config(config)
@@ -57,7 +57,7 @@ class RangeTestCase(unittest.TestCase):
             unit=strategies.sampled_from(UNITS()),
         )
     )
-    @settings(max_examples=30)
+    @settings(max_examples=170)
     def test_setting_value_config(self, config):
         """Test that new str config is the correct one."""
         Config.set_value_config(config)

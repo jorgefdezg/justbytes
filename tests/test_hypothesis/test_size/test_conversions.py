@@ -31,7 +31,7 @@ class ConversionTestCase(unittest.TestCase):
     """Test conversions."""
 
     @given(strategies.integers(), strategies.sampled_from(UNITS()))
-    @settings(max_examples=5)
+    @settings(max_examples=500)
     def test_int(self, size, unit):
         """Test integer conversions."""
         self.assertEqual(int(Range(size, unit)), size * int(unit))
@@ -41,7 +41,7 @@ class ConversionTestCase(unittest.TestCase):
             Range, strategies.integers(), strategies.sampled_from(UNITS())
         )
     )
-    @settings(max_examples=50)
+    @settings(max_examples=510)
     def test_repr(self, value):
         """Test that repr looks right."""
         self.assertEqual(f"{value !r}", f"Range({value.magnitude !r})")

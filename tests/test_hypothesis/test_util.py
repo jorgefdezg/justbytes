@@ -33,7 +33,7 @@ class NextTestCase(unittest.TestCase):
     """
 
     @given(strategies.lists(strategies.integers()), strategies.integers())
-    @settings(max_examples=10)
+    @settings(max_examples=500)
     def test_results_true(self, value, default):
         """
         Test results when the predicate is always True.
@@ -44,7 +44,7 @@ class NextTestCase(unittest.TestCase):
         )
 
     @given(strategies.lists(strategies.integers()), strategies.integers())
-    @settings(max_examples=10)
+    @settings(max_examples=500)
     def test_results_false(self, value, default):
         """
         Test results when the predicate is always False.
@@ -61,7 +61,7 @@ class TakeTestCase(unittest.TestCase):
     """
 
     @given(strategies.lists(strategies.integers()))
-    @settings(max_examples=10)
+    @settings(max_examples=500)
     def test_results_false(self, value):
         """
         Test results when none are sastifactory.
@@ -69,7 +69,7 @@ class TakeTestCase(unittest.TestCase):
         self.assertEqual(list(takeuntil(lambda x: False, value)), value)
 
     @given(strategies.lists(strategies.integers()))
-    @settings(max_examples=10)
+    @settings(max_examples=500)
     def test_results_true(self, value):
         """
         Test results when all are satisfactory.

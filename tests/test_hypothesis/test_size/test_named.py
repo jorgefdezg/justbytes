@@ -59,6 +59,7 @@ class ConversionTestCase(unittest.TestCase):
             strategies.builds(Range, strategies.integers(min_value=1)),
         ),
     )
+    @settings(max_examples=425)
     def test_precision(self, size, unit):
         """Test precision of conversion."""
         factor = int(unit) if unit else int(B)
@@ -79,7 +80,7 @@ class ComponentsTestCase(unittest.TestCase):
             unit=strategies.sampled_from(UNITS() + [None]),
         ),
     )
-    @settings(max_examples=200)
+    @settings(max_examples=225)
     def test_results(self, size, config):
         """Test component results."""
         (magnitude, unit) = size.components(config)
@@ -113,7 +114,7 @@ class DisplayConfigTestCase(unittest.TestCase):
         ),
         strategies.integers(min_value=2, max_value=16),
     )
-    @settings(max_examples=100)
+    @settings(max_examples=500)
     def test_config(self, a_size, config, base):
         """
         Test properties of configuration.
@@ -142,7 +143,7 @@ class DigitsConfigTestCase(unittest.TestCase):
             use_letters=strategies.booleans(),
         ),
     )
-    @settings(max_examples=50)
+    @settings(max_examples=500)
     def test_config(self, a_size, config):
         """
         Test some basic configurations.
@@ -178,6 +179,7 @@ class RoundingTestCase(unittest.TestCase):
             strategies.one_of(strategies.none(), SIZE_STRATEGY),
         ),
     )
+    @settings(max_examples=510)
     def test_bounds(self, size, unit, rounding, bounds):
         """
         Test that result is between the specified bounds,
@@ -197,7 +199,7 @@ class RoundingTestCase(unittest.TestCase):
         ),
         strategies.sampled_from(ROUNDING_METHODS()),
     )
-    @example(Range(32), Range(0), ROUND_DOWN)
+    @settings(max_examples=255)
     def test_results(self, size, unit, rounding):
         """Test roundTo results."""
         # pylint: disable=too-many-branches
