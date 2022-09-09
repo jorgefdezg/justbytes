@@ -15,12 +15,13 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
-""" Tests for Range initialization. """
-
+""" Utilities for testing. """
+# isort: THIRDPARTY
 # isort: STDLIB
+import string
+import unittest
 from fractions import Fraction
-
-
+import random
 
 # isort: THIRDPARTY
 from pypbt import domains
@@ -28,14 +29,10 @@ from pypbt.quantifiers import forall,exists
 # isort: LOCAL
 from justbytes import UNITS, Range
 
-"""Test conversions."""
-@forall(size = domains.Int() | domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),n_samples = 25)
-@forall(unit = UNITS() | 
-    domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)) | 
-    domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1))),n_samples = 20)
-def test_initialization(size,unit):
-    """Test the initializer."""
-    factor = getattr(unit, "factor", getattr(unit, "magnitude", None))
-    if factor is None:
-        factor = Fraction(unit)
-    return Range(size, unit).magnitude == Fraction(size) * factor
+NUMBERS_DOMAIN = domains.Int() | domains.DomainPyObject(Fraction, domains.Int(),domains.Int(min_value = 1, max_value = 100))
+
+
+SIZE_DOMAIN = domains.DomainPyObject(Range,
+    NUMBERS_DOMAIN | domains.DomainPyObject(str, NUMBERS_DOMAIN),
+    UNITS())
+

@@ -47,22 +47,23 @@ from justbytes import (
 )
 from justbytes._constants import UNITS, BinaryUnits, DecimalUnits
 
+from utils import SIZE_DOMAIN
+
 
 """Test conversion methods."""
 
-@forall(size = domains.DomainPyObject(Range,domains.Int(),UNITS()),n_samples = 5)
-@forall(ranges = domains.DomainPyObject(Range,domains.Int(min_value=1),UNITS()),n_samples = 5)
-@forall(units = domains.DomainFromIterable(UNITS(),True))
-def test_precision(size, ranges, units):
-    list_choice= [ranges,units,None]
-    choice = random.choice(list_choice)
+@forall(size = SIZE_DOMAIN,n_samples = 15)
+@forall(unit = UNITS() | 
+    domains.DomainPyObject(Range,domains.Int(min_value = 1),UNITS())
+    | None ,n_samples = 20)
+def test_precision(size,unit):
     """Test precision of conversion."""
-    factor = int(choice) if choice else int(B)
-    return (size.convertTo(choice) * factor) == int(size)
+    factor = int(unit) if unit else int(B)
+    return (int(size.convertTo(unit) * factor)) == int(size)
 
 
 
-@forall(size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 15)
+@forall(size = SIZE_DOMAIN,n_samples = 15)
 @forall(config = domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
     max_places=domains.Int(),
     min_value=domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),
@@ -82,7 +83,7 @@ def test_results(size, config):
     else:
         return unit == config.unit
 
-@forall(size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 15)
+@forall(size = SIZE_DOMAIN,n_samples = 15)
 @forall(config = domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
     max_places=domains.Int(),
     min_value=domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),
@@ -92,19 +93,20 @@ def test_results_magnitude(size,config):
     """Test magnitude results."""
     (magnitude, unit) = size.components(config)
     return magnitude * int(unit) == size.magnitude
+
 # """
 # Test some aspects of the getString() method.
 # """
 
-@forall(a_size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 10)
+@forall(a_size = SIZE_DOMAIN,n_samples = 10)
 @forall(config = domains.DomainPyObject(
         DisplayConfig,
         show_approx_str=domains.Boolean(),
-        base_config= BaseConfig(use_prefix= domains.Boolean(),use_subscript= domains.Boolean()),
+        base_config= BaseConfig(),
         digits_config=DigitsConfig(use_letters=False),
-        strip_config=StripConfig(strip_exact=domains.Boolean(), strip_whole=domains.Boolean())
+        strip_config=StripConfig()
     ),n_samples = 5)
-@forall(base = domains.Int(min_value = 16, max_value =16),n_samples = 10)
+@forall(base = domains.Int(min_value = 2, max_value =16),n_samples = 10)
 def test_config(a_size, config, base):
     """
     Test properties of configuration.
@@ -117,11 +119,12 @@ def test_config(a_size, config, base):
 
     if config.base_config.use_prefix and base == 16:
         return result.find("0x") != -1
+    else: return True
 
 # """
 # Test digits config.
 # """
-@forall(a_size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 5)
+@forall(a_size = SIZE_DOMAIN,n_samples = 5)
 @forall(config = domains.DomainPyObject(DigitsConfig,
         separator=domains.String(coding = "ascii",max_len = 1),
         use_caps=domains.Boolean(),
@@ -151,28 +154,30 @@ def test_digits_config(a_size, config):
 
 # """Test rounding methods."""
 
-@forall(size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 6)
-@forall(bounds = domains.Tuple(domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS())),n_samples=5)
-@forall(unit = domains.DomainFromIterable(UNITS(),True))
-@exists(rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True))
+@forall(size = SIZE_DOMAIN,n_samples = 4)
+@forall(unit = SIZE_DOMAIN | UNITS(), n_samples = 4)
+@forall(rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True))
+@forall(bounds = domains.Tuple(None | SIZE_DOMAIN,None | SIZE_DOMAIN),n_samples=5)
 def test_bounds(size, unit, rounding, bounds):
     """
     Test that result is between the specified bounds,
     assuming that the bounds are legal.
     """
     (lower, upper) = bounds
-    if lower > upper:
+    
+    if lower is not None and upper is not None and lower > upper:
         return True
     rounded = size.roundTo(unit, rounding, bounds)
     if lower is not None and lower > rounded:
         return False
     if upper is not None and upper < rounded:
         return False
+        
     return True
 
 
-@forall(size = domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1,max_value = 100)),UNITS()),n_samples = 15)
-@forall(unit = domains.DomainFromIterable(UNITS(),True))
+@forall(size = SIZE_DOMAIN,n_samples = 15)
+@forall(unit = SIZE_DOMAIN | UNITS(),n_samples = 15)
 @exists(rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True))
 def test_roundTo_results(size, unit, rounding):
     """Test roundTo results."""
@@ -181,33 +186,27 @@ def test_roundTo_results(size, unit, rounding):
 
     if (isinstance(unit, Range) and unit.magnitude == 0) or (
         not isinstance(unit, Range) and int(unit) == 0):
-        if rounded != Range(0):
-            return False
+        return rounded == Range(0)
 
     converted = size.convertTo(unit)
     if converted.denominator == 1:
-        if rounded != size:
-            return False
+        return rounded == size
 
     factor = getattr(unit, "magnitude", None) or int(unit)
     (quotient, remainder) = divmod(converted.numerator, converted.denominator)
     ceiling = Range((quotient + 1) * factor)
     floor = Range(quotient * factor)
     if rounding is ROUND_UP:
-        if rounded != ceiling:
-            return False
+        return rounded == ceiling
 
     if rounding is ROUND_DOWN:
-        if rounded != floor:
-            return False
+        return rounded == floor
 
     if rounding is ROUND_TO_ZERO:
         if size > Range(0):
-            if rounded != floor:
-                return False
+            return rounded == floor
         else:
-            if rounded != ceiling:
-                return False
+            return rounded == ceiling
 
     remainder = abs(Fraction(remainder, converted.denominator))
     half = Fraction(1, 2)
