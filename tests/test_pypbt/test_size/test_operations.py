@@ -39,6 +39,15 @@ def test_addition(size_1,size_2):
     return (size_1 + size_2) == Range(size_1.magnitude + size_2.magnitude)
 
 
+# @forall(size_1 = SIZE_DOMAIN,
+#         size_2 = (a for a in SIZE_DOMAIN if a != Range(0)),n_samples = 500)
+# @forall(size_1 = SIZE_DOMAIN,
+#         size_2 = filter(lambda x: x != Range(0), SIZE_DOMAIN),n_samples = 10)
+# def test_divmod_with_range(size_1,size_2):
+#     """Test divmod with a size."""
+#     (div, rem) = divmod(size_1.magnitude, size_2.magnitude)
+#     return divmod(size_1, size_2) == (div, Range(rem))
+
 
 @forall(size_1 = SIZE_DOMAIN,n_samples = 5)
 @forall(size_2 = filter(lambda x: x != Range(0), SIZE_DOMAIN),n_samples = 2)

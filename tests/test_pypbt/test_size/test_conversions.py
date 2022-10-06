@@ -35,8 +35,7 @@ def test_int(size, unit):
     return int(Range(size, unit)) == (size * int(unit))
 
 
-@forall(unit = domains.DomainFromIterable(UNITS(),True),n_samples = 15)
-@forall(value = lambda unit: domains.DomainPyObject(Range,domains.Int(),UNITS()),n_samples = 15)
-def test_repr(unit,value):
+@forall(value = domains.DomainPyObject(Range,domains.Int(),UNITS()),n_samples = 15)
+def test_repr(value):
     """Test that repr looks right."""
     return (f"{value !r}") == (f"Range({value.magnitude !r})")
