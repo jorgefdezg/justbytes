@@ -45,7 +45,12 @@ from justbytes import (
 )
 from justbytes._constants import UNITS, BinaryUnits, DecimalUnits
 
-from tests.test_hypothesis.test_size.utils import SIZE_STRATEGY  # isort:skip
+#use this import if you are running this file with pytest
+from tests.test_hypothesis.test_size.utils import SIZE_STRATEGY
+
+
+#use this import if you are running this file with pypbt
+# from utils import SIZE_STRATEGY  # isort:skip
 
 
 class ConversionTestCase(unittest.TestCase):
@@ -59,7 +64,7 @@ class ConversionTestCase(unittest.TestCase):
             strategies.builds(Range, strategies.integers(min_value=1)),
         ),
     )
-    @settings(max_examples=425)
+    @settings(max_examples=500)
     def test_precision(self, size, unit):
         """Test precision of conversion."""
         factor = int(unit) if unit else int(B)
@@ -80,7 +85,7 @@ class ComponentsTestCase(unittest.TestCase):
             unit=strategies.sampled_from(UNITS() + [None]),
         ),
     )
-    @settings(max_examples=225)
+    @settings(max_examples=500)
     def test_results(self, size, config):
         """Test component results."""
         (magnitude, unit) = size.components(config)
@@ -179,7 +184,7 @@ class RoundingTestCase(unittest.TestCase):
             strategies.one_of(strategies.none(), SIZE_STRATEGY),
         ),
     )
-    @settings(max_examples=510)
+    @settings(max_examples=500)
     def test_bounds(self, size, unit, rounding, bounds):
         """
         Test that result is between the specified bounds,
@@ -199,7 +204,7 @@ class RoundingTestCase(unittest.TestCase):
         ),
         strategies.sampled_from(ROUNDING_METHODS()),
     )
-    @settings(max_examples=255)
+    @settings(max_examples=500)
     def test_results(self, size, unit, rounding):
         """Test roundTo results."""
         # pylint: disable=too-many-branches

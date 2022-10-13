@@ -25,7 +25,6 @@ from hypothesis import given, strategies, settings
 # isort: LOCAL
 from justbytes._constants import BinaryUnits, DecimalUnits
 
-
 class ConstantsTestCase(unittest.TestCase):
     """Exercise methods of constants classes."""
 
@@ -42,3 +41,5 @@ class ConstantsTestCase(unittest.TestCase):
         self.assertEqual(
             DecimalUnits.unit_for_exp(dexp).factor, DecimalUnits.FACTOR**dexp
         )
+       
+

@@ -52,10 +52,10 @@ from utils import SIZE_DOMAIN
 
 """Test conversion methods."""
 
-@forall(size = SIZE_DOMAIN,n_samples = 15)
-@forall(unit = UNITS() | 
-    domains.DomainPyObject(Range,domains.Int(min_value = 1),UNITS())
-    | None ,n_samples = 20)
+@forall(size = SIZE_DOMAIN,
+        unit = UNITS() | 
+        domains.DomainPyObject(Range,domains.Int(min_value = 1),UNITS())
+        | None ,n_samples = 500)
 def test_precision(size,unit):
     """Test precision of conversion."""
     factor = int(unit) if unit else int(B)
@@ -63,15 +63,21 @@ def test_precision(size,unit):
 
 
 
-@forall(size = SIZE_DOMAIN,n_samples = 15)
-@forall(config = domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
-    max_places=domains.Int(),
-    min_value=domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),
-    exact_value=domains.Boolean(),
-    unit= (UNITS()+[None])),n_samples = 15)
+@forall(size = SIZE_DOMAIN,
+        config = domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
+        max_places=domains.Int(),
+        min_value=domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),
+        exact_value=domains.Boolean(),
+        unit= (UNITS()+[None])),n_samples = 500)
 def test_results(size, config):
     """Test component results."""
-    (magnitude, unit) = size.components(config)
+    (magnitude, unit) = size.components(config) 
+    if magnitude * int(unit) != size.magnitude:
+        return False
+
+    if unit == B:
+        return True
+
     if config.unit is None:
         if config.binary_units:
             if unit in BinaryUnits.UNITS():
@@ -83,30 +89,20 @@ def test_results(size, config):
     else:
         return unit == config.unit
 
-@forall(size = SIZE_DOMAIN,n_samples = 15)
-@forall(config = domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
-    max_places=domains.Int(),
-    min_value=domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),
-    exact_value=domains.Boolean(),
-    unit= (UNITS()+[None])),n_samples = 15)
-def test_results_magnitude(size,config):
-    """Test magnitude results."""
-    (magnitude, unit) = size.components(config)
-    return magnitude * int(unit) == size.magnitude
 
 # """
 # Test some aspects of the getString() method.
 # """
 
-@forall(a_size = SIZE_DOMAIN,n_samples = 10)
-@forall(config = domains.DomainPyObject(
+@forall(a_size = SIZE_DOMAIN,
+        config = domains.DomainPyObject(
         DisplayConfig,
         show_approx_str=domains.Boolean(),
         base_config= BaseConfig(),
         digits_config=DigitsConfig(use_letters=False),
         strip_config=StripConfig()
-    ),n_samples = 5)
-@forall(base = domains.Int(min_value = 2, max_value =16),n_samples = 10)
+        ),
+        base = domains.Int(min_value = 2, max_value =16),n_samples = 500)
 def test_config(a_size, config, base):
     """
     Test properties of configuration.
@@ -124,40 +120,38 @@ def test_config(a_size, config, base):
 # """
 # Test digits config.
 # """
-@forall(a_size = SIZE_DOMAIN,n_samples = 5)
-@forall(config = domains.DomainPyObject(DigitsConfig,
-        separator=domains.String(coding = "ascii",max_len = 1),
-        use_caps=domains.Boolean(),
-        use_letters=domains.Boolean()))
+@forall(a_size = SIZE_DOMAIN,
+        config = domains.DomainPyObject(DigitsConfig,
+            separator=domains.String(alphabet= domains.exhaustible(['-','/','*','j',':']),max_len = 1),
+            use_caps=domains.Boolean(),
+            use_letters=domains.Boolean()),n_samples = 500)
 def test_digits_config(a_size, config):
     """
     Test some basic configurations.
     """
-    text = "-/*j:"
-    if config.separator in text:
-        result = a_size.getString(
-            StringConfig(
-                Config.STRING_CONFIG.VALUE_CONFIG,
-                DisplayConfig(digits_config=config),
-                Config.STRING_CONFIG.DISPLAY_IMPL_CLASS,
-            )
+    result = a_size.getString(
+        StringConfig(
+            Config.STRING_CONFIG.VALUE_CONFIG,
+            DisplayConfig(digits_config=config),
+            Config.STRING_CONFIG.DISPLAY_IMPL_CLASS,
         )
-        if config.use_letters:
-            (number, _, _) = result.partition(" ")
-            letters = [r for r in number if r in string.ascii_letters]
-            if config.use_caps:
-                return all(r in string.ascii_uppercase for r in letters)
-            else:
-                return all(r in string.ascii_lowercase for r in letters)
-        else : return True
-    else: return True
+    )
+    if config.use_letters:
+        (number, _, _) = result.partition(" ")
+        letters = [r for r in number if r in string.ascii_letters]
+        if config.use_caps:
+            return all(r in string.ascii_uppercase for r in letters)
+        else:
+            return all(r in string.ascii_lowercase for r in letters)
+    else : return True
+
 
 # """Test rounding methods."""
 
-@forall(size = SIZE_DOMAIN,n_samples = 4)
-@forall(unit = SIZE_DOMAIN | UNITS(), n_samples = 4)
-@forall(rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True))
-@forall(bounds = domains.Tuple(None | SIZE_DOMAIN,None | SIZE_DOMAIN),n_samples=5)
+@forall(size = SIZE_DOMAIN,
+        unit = SIZE_DOMAIN | UNITS(),
+        rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True),
+        bounds = domains.Tuple(None | SIZE_DOMAIN,None | SIZE_DOMAIN),n_samples=500)
 def test_bounds(size, unit, rounding, bounds):
     """
     Test that result is between the specified bounds,
@@ -176,9 +170,9 @@ def test_bounds(size, unit, rounding, bounds):
     return True
 
 
-@forall(size = SIZE_DOMAIN,n_samples = 15)
-@forall(unit = SIZE_DOMAIN | UNITS(),n_samples = 15)
-@exists(rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True))
+@forall(size = SIZE_DOMAIN,
+        unit = SIZE_DOMAIN | UNITS(),
+        rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True),n_samples = 500)
 def test_roundTo_results(size, unit, rounding):
     """Test roundTo results."""
     # pylint: disable=too-many-branches

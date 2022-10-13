@@ -27,15 +27,9 @@ from justbytes._constants import BinaryUnits, DecimalUnits
 
 """Exercise methods of constants classes."""
 
-@forall(bexp = domains.Int(min_value = 0, max_value = BinaryUnits.max_exponent()),n_samples = 500)
-def test_exp_method_binary(bexp):
-    """Test extracting unit for a given exponent."""
+@forall(bexp = domains.Int(min_value = 0, max_value = BinaryUnits.max_exponent()),
+        dexp = domains.Int(min_value=0, max_value=DecimalUnits.max_exponent()),n_samples = 500)
+def test_exp_method_binary(bexp,dexp):
+    return BinaryUnits.unit_for_exp(bexp).factor == BinaryUnits.FACTOR**bexp and DecimalUnits.unit_for_exp(dexp).factor == DecimalUnits.FACTOR**dexp
 
-    return BinaryUnits.unit_for_exp(bexp).factor == BinaryUnits.FACTOR**bexp
-
-@forall(dexp = domains.Int(min_value=0, max_value=DecimalUnits.max_exponent()),n_samples =500)
-def test_exp_method_decimal(dexp):
-    """Test extracting unit for a given exponent."""
-
-    return DecimalUnits.unit_for_exp(dexp).factor == DecimalUnits.FACTOR**dexp
 

@@ -35,4 +35,3 @@ NUMBERS_DOMAIN = domains.Int() | domains.DomainPyObject(Fraction, domains.Int(),
 SIZE_DOMAIN = domains.DomainPyObject(Range,
     NUMBERS_DOMAIN | domains.DomainPyObject(str, NUMBERS_DOMAIN),
     UNITS())
-

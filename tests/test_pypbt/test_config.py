@@ -16,8 +16,6 @@
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
 """ Test for configuration classes. """
-# isort: STDLIB
-import unittest
 
 # isort: THIRDPARTY
 from pypbt import domains
@@ -32,20 +30,19 @@ from justbytes._constants import UNITS
 """Test Range configuration."""
 
 
-@forall(config = domains.DomainPyObject(DisplayConfig,show_approx_str=domains.Boolean()),n_samples=170)
+@forall(config = domains.DomainPyObject(DisplayConfig,show_approx_str=domains.Boolean()),n_samples=500)
 def test_setting_display_config(config):
     """Test that new str config is the correct one."""
     Config.set_display_config(config)
     return str(config) == str(Config.STRING_CONFIG.DISPLAY_CONFIG)
 
 
-@forall(units = domains.DomainFromIterable(UNITS(),True))
-@forall(config = lambda units: domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
+@forall(config = domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
     max_places=domains.Int(),
     min_value=domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),
     exact_value=domains.Boolean(),
-    unit=units),n_samples = 10)
-def test_setting_value_config(units,config):
+    unit=UNITS()),n_samples = 500)
+def test_setting_value_config(config):
     """Test that new str config is the correct one."""
     Config.set_value_config(config)
     return str(config) == str(Config.STRING_CONFIG.VALUE_CONFIG)
