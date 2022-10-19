@@ -30,6 +30,10 @@ from justbytes._constants import BinaryUnits, DecimalUnits
 @forall(bexp = domains.Int(min_value = 0, max_value = BinaryUnits.max_exponent()),
         dexp = domains.Int(min_value=0, max_value=DecimalUnits.max_exponent()),n_samples = 500)
 def test_exp_method_binary(bexp,dexp):
-    return BinaryUnits.unit_for_exp(bexp).factor == BinaryUnits.FACTOR**bexp and DecimalUnits.unit_for_exp(dexp).factor == DecimalUnits.FACTOR**dexp
+    return (
+        BinaryUnits.unit_for_exp(bexp).factor == BinaryUnits.FACTOR**bexp and
+        DecimalUnits.unit_for_exp(dexp).factor == DecimalUnits.FACTOR**dexp
+    )
+
 
 

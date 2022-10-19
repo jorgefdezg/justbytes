@@ -28,14 +28,14 @@ from justbytes import UNITS, Range
 
 
 """Test conversions."""
-@forall(size = domains.Int(),
+@forall(size = domains.Int(min_value = -10_000),
         unit = domains.DomainFromIterable(UNITS(),True),n_samples = 500)
 def test_int(size, unit):
     """Test integer conversions."""
     return int(Range(size, unit)) == (size * int(unit))
 
 
-@forall(value = domains.DomainPyObject(Range,domains.Int(),UNITS()),n_samples = 500)
+@forall(value = domains.DomainPyObject(Range,domains.Int(min_value = -10_000),UNITS()),n_samples = 500)
 def test_repr(value):
     """Test that repr looks right."""
     return (f"{value !r}") == (f"Range({value.magnitude !r})")

@@ -29,7 +29,7 @@ from pypbt.quantifiers import forall,exists
 # isort: LOCAL
 from justbytes import UNITS, Range
 
-NUMBERS_DOMAIN = domains.Int() | domains.DomainPyObject(Fraction, domains.Int(),domains.Int(min_value = 1, max_value = 100))
+NUMBERS_DOMAIN = domains.Int(min_value = -10_000) | domains.DomainPyObject(Fraction, domains.Int(min_value = -10_000),domains.Int(min_value = 1, max_value = 100))
 
 
 SIZE_DOMAIN = domains.DomainPyObject(Range,

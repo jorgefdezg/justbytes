@@ -29,10 +29,10 @@ from pypbt.quantifiers import forall,exists
 from justbytes import UNITS, Range
 
 """Test conversions."""
-@forall(size = domains.Int() | domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),n_samples = 25)
-@forall(unit = UNITS() | 
-    domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)) | 
-    domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1))),n_samples = 20)
+@forall(size = domains.Int(min_value = -10_000) | domains.DomainPyObject(Fraction,domains.Int(min_value = -10_000),domains.Int(min_value = 1)),
+    unit = UNITS() | 
+        domains.DomainPyObject(Fraction,domains.Int(min_value = -10_000),domains.Int(min_value = 1)) | 
+        domains.DomainPyObject(Range,domains.DomainPyObject(Fraction,domains.Int(min_value = -10_000),domains.Int(min_value = 1))),n_samples = 500)
 def test_initialization(size,unit):
     """Test the initializer."""
     factor = getattr(unit, "factor", getattr(unit, "magnitude", None))

@@ -52,10 +52,10 @@ from utils import SIZE_DOMAIN
 
 """Test conversion methods."""
 
-@forall(size = SIZE_DOMAIN,
+@forall(size = domains.DomainPyObject(Range,domains.Int(min_value = 1)),
         unit = UNITS() | 
-        domains.DomainPyObject(Range,domains.Int(min_value = 1),UNITS())
-        | None ,n_samples = 500)
+        domains.DomainPyObject(Range,domains.Int(min_value = 1),UNITS()) |
+        None ,n_samples = 500)
 def test_precision(size,unit):
     """Test precision of conversion."""
     factor = int(unit) if unit else int(B)
@@ -65,29 +65,29 @@ def test_precision(size,unit):
 
 @forall(size = SIZE_DOMAIN,
         config = domains.DomainPyObject(ValueConfig, binary_units=domains.Boolean(),
-        max_places=domains.Int(),
-        min_value=domains.DomainPyObject(Fraction,domains.Int(),domains.Int(min_value = 1)),
+        min_value=domains.DomainPyObject(Fraction,domains.Int(min_value = 0),domains.Int(min_value = 1)),
         exact_value=domains.Boolean(),
+        max_places=domains.Int(min_value = 0,max_value = 5),
         unit= (UNITS()+[None])),n_samples = 500)
 def test_results(size, config):
     """Test component results."""
     (magnitude, unit) = size.components(config) 
-    if magnitude * int(unit) != size.magnitude:
-        return False
-
     if unit == B:
         return True
-
+        
     if config.unit is None:
         if config.binary_units:
-            if unit in BinaryUnits.UNITS():
-                return True
+            if unit not in BinaryUnits.UNITS():
+                return False
         else:
-            if unit in DecimalUnits.UNITS():
-                return True
+            if unit not in DecimalUnits.UNITS():
+                return False
         return abs(magnitude) >= config.min_value
     else:
-        return unit == config.unit
+        return (
+            (unit == config.unit and
+            magnitude * int(unit) == size.magnitude)
+        )
 
 
 # """
@@ -98,7 +98,7 @@ def test_results(size, config):
         config = domains.DomainPyObject(
         DisplayConfig,
         show_approx_str=domains.Boolean(),
-        base_config= BaseConfig(),
+        base_config= BaseConfig(use_prefix= domains.Boolean()),
         digits_config=DigitsConfig(use_letters=False),
         strip_config=StripConfig()
         ),
@@ -143,13 +143,14 @@ def test_digits_config(a_size, config):
             return all(r in string.ascii_uppercase for r in letters)
         else:
             return all(r in string.ascii_lowercase for r in letters)
-    else : return True
+    else :
+        return True
 
 
 # """Test rounding methods."""
 
 @forall(size = SIZE_DOMAIN,
-        unit = SIZE_DOMAIN | UNITS(),
+        unit = domains.DomainUnion((a for a in SIZE_DOMAIN if a.magnitude >= 0),UNITS()),
         rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True),
         bounds = domains.Tuple(None | SIZE_DOMAIN,None | SIZE_DOMAIN),n_samples=500)
 def test_bounds(size, unit, rounding, bounds):
@@ -158,20 +159,18 @@ def test_bounds(size, unit, rounding, bounds):
     assuming that the bounds are legal.
     """
     (lower, upper) = bounds
-    
+    #We have this clause to avoid tests when bounds are not legal cause lower > upper
     if lower is not None and upper is not None and lower > upper:
         return True
     rounded = size.roundTo(unit, rounding, bounds)
-    if lower is not None and lower > rounded:
-        return False
-    if upper is not None and upper < rounded:
-        return False
-        
-    return True
+    return (
+        (lower is None or lower <= rounded) and
+        (upper is None or upper >= rounded)
+    )
 
 
 @forall(size = SIZE_DOMAIN,
-        unit = SIZE_DOMAIN | UNITS(),
+        unit = domains.DomainUnion((a for a in SIZE_DOMAIN if a.magnitude >= 0),UNITS()),
         rounding = domains.DomainFromIterable(ROUNDING_METHODS(),True),n_samples = 500)
 def test_roundTo_results(size, unit, rounding):
     """Test roundTo results."""
