@@ -46,11 +46,11 @@ from justbytes import (
 from justbytes._constants import UNITS, BinaryUnits, DecimalUnits
 
 #use this import if you are running this file with pytest
-from tests.test_hypothesis.test_size.utils import SIZE_STRATEGY
+#from tests.test_hypothesis.test_size.utils import SIZE_STRATEGY
 
 
 #use this import if you are running this file with pypbt
-# from utils import SIZE_STRATEGY  # isort:skip
+from utils import SIZE_STRATEGY  # isort:skip
 
 
 class ConversionTestCase(unittest.TestCase):

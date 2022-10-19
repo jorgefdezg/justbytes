@@ -30,10 +30,10 @@ from hypothesis import given, settings
 from justbytes import Range
 
 #use this import if you are running this file with pytest
-from tests.test_hypothesis.test_size.utils import SIZE_STRATEGY,NUMBERS_STRATEGY
+#from tests.test_hypothesis.test_size.utils import SIZE_STRATEGY,NUMBERS_STRATEGY
 
 #use this import if you are running this file with pypbt
-# from utils import NUMBERS_STRATEGY, SIZE_STRATEGY 
+from utils import NUMBERS_STRATEGY, SIZE_STRATEGY 
 
 
 

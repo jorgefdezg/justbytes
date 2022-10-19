@@ -61,4 +61,4 @@ class RangeTestCase(unittest.TestCase):
     def test_setting_value_config(self, config):
         """Test that new str config is the correct one."""
         Config.set_value_config(config)
-        self.assertNotEqual(str(config), str(Config.STRING_CONFIG.VALUE_CONFIG))
+        self.assertEqual(str(config), str(Config.STRING_CONFIG.VALUE_CONFIG))
